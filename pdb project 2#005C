@@ -1,0 +1,38 @@
+#https://github.com/kristenweeks/chemmie-boi
+import sys
+import math
+
+#open and read pdb file
+def readpdb(pdbname):
+	pdbfile=open(pdbname,'r')
+	lines=pdbname.readlines()
+	pdbname.close()
+
+records=[]
+for line in lines:
+	d={}
+	atom=str(line[0:4])
+	serialnumber=str(line[8:11])
+	name=str(line[14:16])
+	residue=str(line[18:20])
+	chainID=str(line[22])
+	residueseqnumber=int(line[24:26])
+	x=float(line[33:38])
+	y=float(line[40:46])
+	z=float(line[49:54])
+	occupancy=float(line[57:60])
+	tempfactors=float(line[62:66])
+	element=line[76:78].strip()
+	mass=dictionarymass[element]
+	
+	records.append([atom,serialnumber,name,residue,chainID,residueseqnumber,x,y,z,occupancy,tempfactors,element,mass])
+	
+print(records)
+
+#create a function to find RMSD between two pdb files
+def RMSD():
+	pdb1=sys.argv[0]
+	pdb2=sys.argv[1]
+	n=len(records)
+	for x in records:
+		nRMSD=sqrt(1/global n((((sys.argv[0](x))-(sys.argv[1](x)))**2)+(((sys.argv[0](y))-(sys.argv[1](y)))**2)+(((sys.argv[0](z))-(sys.argv[1](z)))**2)))
