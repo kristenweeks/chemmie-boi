@@ -1,0 +1,113 @@
+#!/usr/bin/env python3
+#https://github.com/kristenweeks/chemmie-boi
+
+import numpy as np
+from matplotlib import pyplot as plt
+
+#Read and parse chromatogram file
+f=open("superose6_50.asc")
+lines=f.readlines()
+f.close()
+
+t=[]
+a=[]
+for line in lines[3:]:
+	words=line.split()
+	try:
+		t.append(float(words[0]))
+		a.append(float(words[1]))
+	except:
+		print ("could not parse", line)
+		continue
+#print a
+
+t=np.array(t)
+a=np.array(a)
+
+
+#pyplot.xlim(0,180)
+#pyplot.ylim(0, 2000)
+da=np.gradient(a)
+dda=np.gradient(da)
+pyplot.plot(t,da)
+pyplot.plot(t,a)
+pyplot.plot(t,dda)
+
+pyplot.show()
+
+#Identify peaks and delineate their boundaries
+
+peaks_t = []
+peaks_a = []
+peaks_index = []
+peaks = []
+
+#Three continuous points a,b,c. If b is the highest, it is a peak, but
+#b has to be high enough to avoid noise.
+radius = 10
+for i in range(radius,len(a)-radius):
+    b = a[i-1]
+    c = a[i]
+    d = a[i+1]
+    average = np.mean(y[i-radius:i+radius])
+    if (c >= b and c >= d) and (c > average*higher):
+        peaks_t.append(t[i])
+        peaks_a.append(a[i])
+        peaks_index.append(i)
+        peaks.append((t[i], a[i]))
+print("The detected peaks are (Time, Absorbance):")
+print(peaks)    
+
+#Find the slope for each point.
+slope = []
+for i in range(len(a)-1):
+    da = a[i+1] - a[i]
+    dt = t[i+1] - t[i]
+    slope.append(da/dt)
+slope.append(slope[-1])
+
+#Find the up and down sections.
+threshold = 6
+up_t = []
+up_a = []
+down_t = []
+down_a = []
+
+for i in range(len(slope)):
+    if slope[i] > threshold:
+        up_t.append(t[i])
+        up_a.append(a[i])
+    else:
+        up_t.append(t[i])
+        up_a.append(0)
+        
+for i in range(len(slope)):
+    if slope[i] < -threshold:
+        down_t.append(t[i])
+        down_a.append(a[i])
+    else:
+        down_t.append(t[i])
+        down_a.append(0)
+        
+#Find the boundaries of each peak.
+start_t = []
+start_a = []
+end_t = []
+end_a = []
+for i in range(len(peaks_index)):
+    n = peaks_index[i]
+    while(up_a[n-5] != 0):
+        n = n-1
+    start_t.append(t[n-4])
+    start_a.append(a[n-4])
+
+for i in range(len(peaks_index)):
+    n = peaks_index[i]    
+    while(down_a[n+5] != 0):
+        n = n + 1
+    end_t.append(t[n+4])
+    end_a.append(a[n+4])
+
+for i in range(len(start_t)):
+    print("Boundaries of Peak %d:" %(i+1), start_t[i],",", end_t[i])
+
